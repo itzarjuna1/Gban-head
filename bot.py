@@ -10,6 +10,24 @@ from database.bots import register_bot
 
 # ---------- Helper Functions ----------
 
+
+from pyrogram import filters
+from pyrogram.types import Message
+
+@app.on_message(filters.private & filters.command("start"))
+async def start_handler(client: Client, message: Message):
+    user_id = message.from_user.id
+    if user_id not in config.SUDO_USERS:  # only owner/sudo can use
+        await message.reply_text("❌ You are not allowed to use this bot.")
+        return
+
+    await message.reply_text(
+        "✅ Hello! You are authorized.\nUse /gban to ban users.",
+        reply_markup=None  # you can add InlineKeyboardMarkup here later
+    )
+
+
+
 async def ensure_time_sync():
     """
     Ensure the server time is in sync with Telegram.
