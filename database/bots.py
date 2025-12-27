@@ -1,34 +1,36 @@
-import time
 from database.mongo import db
 
+# Collection for connected bots
 bots_col = db.connected_bots
 
 
-async def register_bot(app):
+async def register_bot(bot_id: int, bot_username: str):
     """
-    Register or update this bot in MongoDB
+    Register a bot in the network.
+    If the bot already exists, update its username.
     """
-    me = await app.get_me()
-
     await bots_col.update_one(
-        {"bot_id": me.id},
-        {
-            "$set": {
-                "bot_id": me.id,
-                "bot_username": me.username,
-                "bot_name": me.first_name,
-                "connected_at": int(time.time())
-            }
-        },
+        {"bot_id": bot_id},
+        {"$set": {"bot_username": bot_username}},
         upsert=True
     )
 
 
+async def remove_bot(bot_id: int):
+    """
+    Remove a bot from the network.
+    """
+    await bots_col.delete_one({"bot_id": bot_id})
+
+
 async def get_connected_bots():
     """
-    Return list of all connected bots
+    Return a list of all connected bots in the network.
     """
     bots = []
-    async for bot in bots_col.find():
-        bots.append(bot)
+    async for b in bots_col.find():
+        bots.append({
+            "bot_id": b.get("bot_id"),
+            "bot_username": b.get("bot_username")
+        })
     return bots
