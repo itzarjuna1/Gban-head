@@ -1,0 +1,50 @@
+# =========================
+# GLOBAL
+# =========================
+access_denied: "🚫 You are not authorized to use this bot."
+
+# =========================
+# START / PRIVATE
+# =========================
+start_owner: |
+  🎛️ **GBAN CENTRAL CONTROL PANEL**
+  
+  Network Status: ✅ Online
+  Access Level: **Administrator**
+
+start_normal: |
+  🚫 **Access Restricted**
+  
+  This bot is private and not available for public use.
+
+# =========================
+# BUTTONS
+# =========================
+btn_gban: "🚫 GBan"
+btn_ungban: "♻ UnGBan"
+btn_gban_list: "📄 GBan List"
+btn_sudo_list: "👮 Sudo Users"
+btn_connected_bots: "🤖 Connected Bots"
+btn_control_panel: "🛠 Control Panel"
+btn_support: "📢 Support"
+btn_back: "⬅️ Back"
+
+# =========================
+# SUDO
+# =========================
+sudo_added: "✅ User added to sudo list."
+sudo_removed: "❌ User removed from sudo list."
+sudo_list_title: "👮 **Sudo Users**"
+
+# =========================
+# GBAN
+# =========================
+gban_done: "🚫 User has been globally banned."
+ungban_done: "♻ User has been globally unbanned."
+gban_list_title: "📄 **Globally Banned Users**"
+
+# =========================
+# BOTS
+# =========================
+bots_list_title: "🤖 **Connected Bots**"
+bots_none: "No bots are currently connected."
