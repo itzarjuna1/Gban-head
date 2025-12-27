@@ -13,12 +13,10 @@ from database.bots import register_bot
 async def ensure_time_sync():
     """
     Ensure the server time is in sync with Telegram.
-    Retry pinging Telegram if BadMsgNotification occurs.
     """
     now = int(time.time())
     print(f"[INFO] Current UNIX timestamp: {now}")
-    # Sleep a little to let time stabilize
-    await asyncio.sleep(1)
+    await asyncio.sleep(1)  # small delay for stability
 
 async def safe_start(app: Client):
     """
@@ -55,12 +53,17 @@ async def main():
     if not started:
         return
 
-    # Optional: register this bot in MongoDB
-    await register_bot(bot_id=(await app.get_me()).id, bot_username=(await app.get_me()).username)
+    # Register this bot in MongoDB
+    me = await app.get_me()
+    await register_bot(me.id, me.username)
+
+    # Print bot info
+    print(f"[INFO] Bot connected as @{me.username} ({me.id})")
+    print("[INFO] MongoDB database:", config.DB_NAME)
 
     # Keep the bot running
     print("[INFO] Bot is running...")
-    await asyncio.Event().wait()
+    await asyncio.Event().wait()  # keeps bot alive
 
 if __name__ == "__main__":
     asyncio.run(main())
