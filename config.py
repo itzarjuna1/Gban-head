@@ -9,11 +9,11 @@ API_HASH = os.getenv("API_HASH", "8a4b8206da5f273c4147a091a9e9c73f")
 BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 
 # MongoDB
-MONGO_URI = os.getenv("MONGO_URI","7852340648")
+MONGO_URI = os.getenv("MONGO_URI","")
 DB_NAME = os.getenv("DB_NAME")
 
 # Owner
-OWNER_ID = int(os.getenv("OWNER_ID", ""))
+OWNER_ID = int(os.getenv("OWNER_ID", "7852340648"))
 
 # Support & logging
 SUPPORT_CHAT = os.getenv("SUPPORT_CHAT", "https://t.me/snowy_hometown")
