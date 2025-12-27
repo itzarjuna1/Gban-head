@@ -10,7 +10,7 @@ BOT_TOKEN = os.getenv("BOT_TOKEN", "")
 
 # MongoDB
 MONGO_URI = os.getenv("MONGO_URI","")
-DB_NAME = os.getenv("DB_NAME")
+DB_NAME = os.getenv("DB_NAME", "DARK_DATABASE")
 
 # Owner
 OWNER_ID = int(os.getenv("OWNER_ID", "7852340648"))
