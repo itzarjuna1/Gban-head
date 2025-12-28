@@ -45,3 +45,15 @@ async def get_gban_list():
     async for u in gbans_col.find({"active": True}):
         users.append(u)
     return users
+
+async def watch_gbans():
+    collection = db["gbans"]
+    async with collection.watch() as stream:
+        async for change in stream:
+            if change["operationType"] == "insert":
+                new_gban = change["fullDocument"]
+                # propagate to other bots connected to MongoDB
+                user_id = new_gban["user_id"]
+                reason = new_gban.get("reason", "No reason")
+                print(f"[INFO] New GBAN detected: {user_id} Reason: {reason}")
+                
