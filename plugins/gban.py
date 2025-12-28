@@ -2,10 +2,10 @@ import asyncio
 from pyrogram import filters
 from pyrogram.types import Message, InputMediaPhoto, InputMediaVideo
 from pyrogram.errors import FloodWait
-from GBan-head import app
-from GBan-head.misc import SUDOERS
-from GBan-head.utils import get_readable_time
-from GBan-head.utils.database import (
+from GBan_head import PARTH
+from GBan_head.misc import SUDOERS
+from GBan_head.utils import get_readable_time
+from GBan_head.utils.database import (
     add_banned_user,
     remove_banned_user,
     is_banned_user,
