@@ -15,7 +15,7 @@ import config
 from config import BANNED_USERS
 from strings import get_string
 
-from Gban_head import app
+from Gban_head import PARTH
 from Gban_head.misc import _boot_
 from Gban_head.plugins.sudo.sudoers import sudoers_list
 from Gban_head.utils.database import (
