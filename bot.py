@@ -2,7 +2,7 @@ import asyncio
 import signal
 
 from Gban_head.core.client import PARTH
-from Gban_head.logging import LOGGER
+from Gban_head.logger import LOGGER
 
 
 bot = PARTH()
