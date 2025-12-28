@@ -1,173 +1,174 @@
 import asyncio
 import os
 import time
-from pyrogram import Client, filters
-from pyrogram.types import Message, InlineKeyboardMarkup, InlineKeyboardButton
+
+from pyrogram import Client, filters, idle
+from pyrogram.types import (
+    Message,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton
+)
 from pyrogram.errors import BadMsgNotification
 
 import config
-from database.mongo import db
 from database.bots import register_bot, get_connected_bots
 from database.sudo import add_sudo, remove_sudo, get_sudo_list
 from database.gbans import add_gban, get_gban_list
 
-# ---------- Create the bot client ----------
+# ---------------- CLIENT ---------------- #
+
 app = Client(
-    "bot",
+    name="gban_bot",
     api_id=int(config.API_ID),
     api_hash=config.API_HASH,
     bot_token=config.BOT_TOKEN,
-    workdir="./sessions"
+    workdir="sessions"
 )
 
-# ---------- Helper Functions ----------
-async def ensure_time_sync():
-    now = int(time.time())
-    print(f"[INFO] Current UNIX timestamp: {now}")
-    await asyncio.sleep(1)
+# ---------------- HELPERS ---------------- #
 
-async def safe_start(app: Client):
-    max_retries = 5
-    for attempt in range(1, max_retries + 1):
-        try:
-            await app.start()
-            print("[INFO] Bot started successfully!")
-            return True
-        except BadMsgNotification:
-            print(f"[WARN] BadMsgNotification [16] occurred, retrying... ({attempt}/{max_retries})")
-            await ensure_time_sync()
-    print("[ERROR] Could not start bot due to BadMsgNotification.")
-    return False
-
-def owner_only(user_id: int) -> bool:
+def is_authorized(user_id: int) -> bool:
     return user_id in config.SUDO_USERS
 
-# ---------- Inline Keyboards ----------
-def start_buttons():
-    return InlineKeyboardMarkup([
-        [InlineKeyboardButton("⚙️ Control Panel", callback_data="control_panel")],
-        [InlineKeyboardButton("📢 Support", url=config.SUPPORT_CHAT)],
-        [InlineKeyboardButton("🤖 Connected Bots", callback_data="connected_bots")]
-    ])
 
-# ---------- Command Handlers ----------
-
-@app.on_message(filters.private & filters.command("start"))
-async def start_handler(client: Client, message: Message):
-    user_id = message.from_user.id
-    if not owner_only(user_id):
-        return await message.reply_text("❌ You are not allowed to use this bot.")
-
-    await message.reply_text(
-        "✅ Welcome! You are authorized.\nUse the buttons below or commands to manage GBAN.",
-        reply_markup=start_buttons()
+def start_keyboard():
+    return InlineKeyboardMarkup(
+        [
+            [InlineKeyboardButton("⚙ Control Panel", callback_data="panel")],
+            [InlineKeyboardButton("🤖 Connected Bots", callback_data="bots")],
+            [InlineKeyboardButton("📢 Support", url=config.SUPPORT_CHAT)],
+        ]
     )
 
+
+async def safe_start():
+    for i in range(5):
+        try:
+            await app.start()
+            print("[INFO] Bot started")
+            return
+        except BadMsgNotification:
+            print(f"[WARN] BadMsgNotification [16], retry {i+1}/5")
+            time.sleep(2)
+    raise RuntimeError("Failed to start bot due to BadMsgNotification")
+
+# ---------------- COMMANDS ---------------- #
+
+@app.on_message(filters.private & filters.command("start"))
+async def start_cmd(_, message: Message):
+    if not is_authorized(message.from_user.id):
+        return await message.reply_text("❌ You are not authorized to use this bot.")
+
+    await message.reply_text(
+        "✅ **GBAN Controller Online**\n\n"
+        "Use commands or buttons below.",
+        reply_markup=start_keyboard()
+    )
+
+
 @app.on_message(filters.private & filters.command("addsudo"))
-async def addsudo_handler(client: Client, message: Message):
-    user_id = message.from_user.id
-    if not owner_only(user_id):
-        return await message.reply_text("❌ You are not allowed to use this command.")
+async def addsudo_cmd(_, message: Message):
+    if not is_authorized(message.from_user.id):
+        return
 
     if len(message.command) < 2:
         return await message.reply_text("Usage: /addsudo <user_id>")
 
-    target_id = int(message.command[1])
-    await add_sudo(target_id)
-    await message.reply_text(f"✅ Added {target_id} as sudo.")
+    uid = int(message.command[1])
+    await add_sudo(uid)
+    await message.reply_text(f"✅ Added `{uid}` as sudo.")
+
 
 @app.on_message(filters.private & filters.command("delsudo"))
-async def delsudo_handler(client: Client, message: Message):
-    user_id = message.from_user.id
-    if not owner_only(user_id):
-        return await message.reply_text("❌ You are not allowed to use this command.")
+async def delsudo_cmd(_, message: Message):
+    if not is_authorized(message.from_user.id):
+        return
 
     if len(message.command) < 2:
         return await message.reply_text("Usage: /delsudo <user_id>")
 
-    target_id = int(message.command[1])
-    await remove_sudo(target_id)
-    await message.reply_text(f"✅ Removed {target_id} from sudo list.")
+    uid = int(message.command[1])
+    await remove_sudo(uid)
+    await message.reply_text(f"❌ Removed `{uid}` from sudo list.")
+
 
 @app.on_message(filters.private & filters.command("sudolist"))
-async def sudolist_handler(client: Client, message: Message):
-    user_id = message.from_user.id
-    if not owner_only(user_id):
-        return await message.reply_text("❌ You are not allowed to use this command.")
+async def sudolist_cmd(_, message: Message):
+    if not is_authorized(message.from_user.id):
+        return
 
     sudos = await get_sudo_list()
     if not sudos:
-        return await message.reply_text("⚠️ No sudo users found.")
+        return await message.reply_text("No sudo users.")
 
-    text = "🛡️ Sudo Users:\n" + "\n".join(str(u) for u in sudos)
+    text = "**🛡 Sudo Users:**\n" + "\n".join(str(x) for x in sudos)
     await message.reply_text(text)
 
+
 @app.on_message(filters.private & filters.command("gban"))
-async def gban_handler(client: Client, message: Message):
-    user_id = message.from_user.id
-    if not owner_only(user_id):
-        return await message.reply_text("❌ You are not allowed to use this command.")
+async def gban_cmd(_, message: Message):
+    if not is_authorized(message.from_user.id):
+        return
 
     if len(message.command) < 2:
         return await message.reply_text("Usage: /gban <user_id> [reason]")
 
-    target_id = int(message.command[1])
+    uid = int(message.command[1])
     reason = " ".join(message.command[2:]) or "No reason"
-    await add_gban(target_id, reason)
 
-    await message.reply_text(f"✅ User `{target_id}` globally banned!\nReason: {reason}")
+    await add_gban(uid, reason)
+    await message.reply_text(f"🚫 **GBanned `{uid}`**\nReason: {reason}")
+
 
 @app.on_message(filters.private & filters.command("gbanlist"))
-async def gbanlist_handler(client: Client, message: Message):
-    user_id = message.from_user.id
-    if not owner_only(user_id):
-        return await message.reply_text("❌ You are not allowed to use this command.")
+async def gbanlist_cmd(_, message: Message):
+    if not is_authorized(message.from_user.id):
+        return
 
     gbans = await get_gban_list()
     if not gbans:
-        return await message.reply_text("⚠️ No users are globally banned.")
+        return await message.reply_text("No GBanned users.")
 
-    text = "🚫 GBanned Users:\n" + "\n".join(f"{u['user_id']}: {u['reason']}" for u in gbans)
+    text = "**🚫 GBAN List:**\n"
+    for u in gbans:
+        text += f"- `{u['user_id']}` → {u['reason']}\n"
+
     await message.reply_text(text)
 
-# ---------- Callback Query Handlers ----------
-@app.on_callback_query()
-async def button_handler(client, callback_query):
-    data = callback_query.data
-    user_id = callback_query.from_user.id
-    if not owner_only(user_id):
-        return await callback_query.answer("❌ Not allowed", show_alert=True)
+# ---------------- CALLBACKS ---------------- #
 
-    if data == "control_panel":
-        await callback_query.message.edit_text("⚙️ Control Panel")
-    elif data == "connected_bots":
+@app.on_callback_query()
+async def callbacks(_, cb):
+    if not is_authorized(cb.from_user.id):
+        return await cb.answer("Not allowed", show_alert=True)
+
+    if cb.data == "panel":
+        await cb.message.edit_text("⚙ Control Panel\n\nUse commands.")
+
+    elif cb.data == "bots":
         bots = await get_connected_bots()
         if not bots:
-            await callback_query.message.edit_text("⚠️ No bots connected.")
+            await cb.message.edit_text("No connected bots.")
         else:
-            text = "🤖 Connected Bots:\n" + "\n".join(f"@{b['bot_username']}" for b in bots)
-            await callback_query.message.edit_text(text)
+            text = "**🤖 Connected Bots:**\n"
+            for b in bots:
+                text += f"- @{b['bot_username']}\n"
+            await cb.message.edit_text(text)
 
-# ---------- Main Function ----------
+# ---------------- MAIN ---------------- #
+
 async def main():
-    # Ensure sessions folder exists
-    os.makedirs("./sessions", exist_ok=True)
+    os.makedirs("sessions", exist_ok=True)
 
-    # Safe start with retry
-    started = await safe_start(app)
-    if not started:
-        return
+    await safe_start()
 
-    # Register bot in MongoDB
     me = await app.get_me()
     await register_bot(me.id, me.username)
-    print(f"[INFO] Bot connected as @{me.username} ({me.id})")
-    print("[INFO] MongoDB database:", config.DB_NAME)
-    print("[INFO] Bot is running...")
 
-    # Keep the bot alive
-    await asyncio.Event().wait()
+    print(f"[INFO] Logged in as @{me.username} ({me.id})")
+    print("[INFO] Bot is RUNNING")
 
-# ---------- Run ----------
+    await idle()
+
 if __name__ == "__main__":
     asyncio.run(main())
