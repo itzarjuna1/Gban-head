@@ -1,18 +1,19 @@
 from pyrogram import Client, filters, idle
 import config
 
+print("Starting bot...")
+
 app = Client(
-    "gban_bot",
+    "bot",
     api_id=int(config.API_ID),
     api_hash=config.API_HASH,
-    bot_token=config.BOT_TOKEN
+    bot_token=config.BOT_TOKEN,
 )
 
-@app.on_message(filters.command("start"))
-async def start(_, message):
-    await message.reply_text("✅ Bot is alive and replying")
+@app.on_message(filters.private & filters.command("start"))
+async def start_handler(_, message):
+    await message.reply_text("✅ Bot is alive and responding!")
 
-print("Starting bot...")
 app.start()
-print("Bot started. Listening for updates...")
+print("Bot started successfully.")
 idle()
