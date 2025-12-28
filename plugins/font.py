@@ -1,8 +1,8 @@
 from pyrogram import  filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from SONALI.utils.purvi_font import Fonts
-from SONALI import app
+from Gban-head.utils.Gban_font import Fonts
+from Gban-head import app
 
 @app.on_message(filters.command(["font", "fonts"]))
 async def style_buttons(c, m, cb=False):
@@ -43,7 +43,7 @@ async def style_buttons(c, m, cb=False):
             InlineKeyboardButton("H̆̈ă̈p̆̈p̆̈y̆̈", callback_data="style+happy"),
             InlineKeyboardButton("S̑̈ȃ̈d̑̈", callback_data="style+sad"),
         ],
-        [InlineKeyboardButton ("ᴄʟᴏsᴇ",callback_data="close_reply"),InlineKeyboardButton ("ɴᴇxᴛ ➻", callback_data="nxt")],
+        [InlineKeyboardButton ("✦ᴄʟᴏsᴇ✦",callback_data="close_reply"),InlineKeyboardButton ("ɴᴇxᴛ ➻", callback_data="nxt")],
     ]
     if not cb:
         await m.reply_text(
