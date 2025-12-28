@@ -1,8 +1,8 @@
 from pyrogram import  filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-from Gban-head.utils.Gban_font import Fonts
-from Gban-head import app
+from Gban_head.utils.Gban_font import Fonts
+from Gban_head import PARTH
 
 @app.on_message(filters.command(["font", "fonts"]))
 async def style_buttons(c, m, cb=False):
