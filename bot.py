@@ -1,3 +1,12 @@
+import logging
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=logging.INFO
+)
+LOGGER = logging.getLogger(__name__)
+
+
 import asyncio
 import signal
 import sys
@@ -11,7 +20,6 @@ from database.bots import register_bot, get_connected_bots
 from database.sudo import add_sudo, remove_sudo, get_sudo_list
 from database.gbans import add_gban, get_gban_list
 
-from ..logging import LOGGER
 
 # ------------------ Bot Class ------------------
 class GbanHead(Client):
