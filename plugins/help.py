@@ -8,7 +8,7 @@ from pyrogram.types import (
     CallbackQuery,
 )
 
-from Gban_head import app
+from Gban_head import PARTH
 from Gban_head.utils.inline import help_pannel
 from Gban_head.utils.database import get_lang
 from Gban_head.utils.decorators.language import LanguageStart, languageCB
