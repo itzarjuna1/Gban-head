@@ -4,7 +4,7 @@ from re import findall
 from bing_image_downloader import downloader
 from pyrogram import Client, filters
 from pyrogram.types import InputMediaPhoto, Message
-from Gban-head import app
+from Gban_head import PARTH
 
 @app.on_message(filters.command(["img", "image"], prefixes=["/", "!"]))
 async def google_img_search(client: Client, message: Message):
