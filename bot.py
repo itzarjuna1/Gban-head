@@ -1,26 +1,52 @@
-import asyncio
-import signal
+from pyrogram import Client, errors
+from pyrogram.enums import ChatMemberStatus
 
-from Gban_head.core.client import PARTH
-from Gban_head.logger import LOGGER
+import config
 
-
-bot = PARTH()
+from logger import LOGGER
 
 
-async def main():
-    await bot.start()
-    LOGGER(__name__).info("Bot is running...")
+class PARTH(Client):
+    def __init__(self):
+        LOGGER(__name__).info(f"Starting Bot...")
+        super().__init__(
+            name="SONALI",
+            api_id=config.API_ID,
+            api_hash=config.API_HASH,
+            bot_token=config.BOT_TOKEN,
+            in_memory=True,
+            max_concurrent_transmissions=7,
+        )
 
-    stop_event = asyncio.Event()
+    async def start(self):
+        await super().start()
+        self.id = self.me.id
+        self.name = self.me.first_name + " " + (self.me.last_name or "")
+        self.username = self.me.username
+        self.mention = self.me.mention
 
-    loop = asyncio.get_running_loop()
-    for sig in (signal.SIGINT, signal.SIGTERM):
-        loop.add_signal_handler(sig, stop_event.set)
+        try:
+            await self.send_message(
+                chat_id=config.LOGGER_ID,
+                text=f"<u><b>» {self.mention} ʙᴏᴛ sᴛᴀʀᴛᴇᴅ :</b><u>\n\nɪᴅ : <code>{self.id}</code>\nɴᴀᴍᴇ : {self.name}\nᴜsᴇʀɴᴀᴍᴇ : @{self.username}",
+            )
+        except (errors.ChannelInvalid, errors.PeerIdInvalid):
+            LOGGER(__name__).error(
+                "Bot has failed to access the log group/channel. Make sure that you have added your bot to your log group/channel."
+            )
 
-    await stop_event.wait()
-    await bot.stop()
+        except Exception as ex:
+            LOGGER(__name__).error(
+                f"Bot has failed to access the log group/channel.\n  Reason : {type(ex).__name__}."
+            )
 
+        a = await self.get_chat_member(config.LOGGER_ID, self.id)
+        if a.status != ChatMemberStatus.ADMINISTRATOR:
+            LOGGER(__name__).error(
+                "Please promote your bot as an admin in your log group/channel."
+            )
 
-if __name__ == "__main__":
-    asyncio.run(main())
+        LOGGER(__name__).info(f"Music Bot Started as {self.name}")
+
+    async def stop(self):
+        await super().stop()
