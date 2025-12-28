@@ -15,16 +15,16 @@ import time
 import uuid
 from io import BytesIO
 
-import Gban-head.modules.sql.feds_sql as sql
-from Gban-head import (EVENT_LOGS, LOGGER, OWNER_ID, DRAGONS, TIGERS, WOLVES,
+import Gban_head.modules.sql.feds_sql as sql
+from Gban_head import (EVENT_LOGS, LOGGER, OWNER_ID, DRAGONS, TIGERS, WOLVES,
                           dispatcher)
-from Gban-head.modules.disable import DisableAbleCommandHandler
-from Gban-head.modules.helper_funcs.alternate import send_message
-from Gban-head.modules.helper_funcs.chat_status import is_user_admin
-from Gban-head.modules.helper_funcs.extraction import (extract_unt_fedban,
+from Gban_head.modules.disable import DisableAbleCommandHandler
+from Gban_head.modules.helper_funcs.alternate import send_message
+from Gban_head.modules.helper_funcs.chat_status import is_user_admin
+from Gban_head.modules.helper_funcs.extraction import (extract_unt_fedban,
                                                           extract_user,
                                                           extract_user_fban)
-from Gban-head.modules.helper_funcs.string_handling import markdown_parser
+from Gban_head.modules.helper_funcs.string_handling import markdown_parser
 from telegram import (InlineKeyboardButton, InlineKeyboardMarkup, MessageEntity,
                       ParseMode, Update)
 from telegram.error import BadRequest, TelegramError, Unauthorized
