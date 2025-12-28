@@ -45,7 +45,7 @@ NEXI_VID = [
 # =========================
 # PRIVATE /start
 # =========================
-@app.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
+@PARTH.on_message(filters.command(["start"]) & filters.private & ~BANNED_USERS)
 @LanguageStart
 async def start_pm(client, message: Message, _):
     await add_served_user(message.from_user.id)
@@ -136,7 +136,7 @@ async def start_pm(client, message: Message, _):
 # =========================
 # GROUP /start
 # =========================
-@app.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
+@PARTH.on_message(filters.command(["start"]) & filters.group & ~BANNED_USERS)
 @LanguageStart
 async def start_gp(client, message: Message, _):
     uptime = int(time.time() - _boot_)
@@ -152,7 +152,7 @@ async def start_gp(client, message: Message, _):
 # =========================
 # WELCOME HANDLER
 # =========================
-@app.on_message(filters.new_chat_members, group=-1)
+@PARTH.on_message(filters.new_chat_members, group=-1)
 async def welcome(client, message: Message):
     for member in message.new_chat_members:
         try:
